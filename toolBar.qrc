@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/new/toolbar">
+        <file>resource/delete.png</file>
+        <file>resource/edit.png</file>
+        <file>resource/fresh.png</file>
+        <file>resource/save.png</file>
+        <file>resource/search.png</file>
+        <file>resource/view.png</file>
+        <file>resource/add.png</file>
+    </qresource>
+</RCC>

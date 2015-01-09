@@ -1,0 +1,13 @@
+INPUT(
+./release/main.o
+./release/mainwindow.o
+./release/dish.o
+./release/table.o
+./release/util.o
+./release/logindialog.o
+./release/adminmainwindow.o
+./release/qrc_toolBar.o
+./release/moc_mainwindow.o
+./release/moc_logindialog.o
+./release/moc_adminmainwindow.o
+);

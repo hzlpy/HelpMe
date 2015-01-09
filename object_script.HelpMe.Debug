@@ -1,0 +1,13 @@
+INPUT(
+./debug/main.o
+./debug/mainwindow.o
+./debug/dish.o
+./debug/table.o
+./debug/util.o
+./debug/logindialog.o
+./debug/adminmainwindow.o
+./debug/qrc_toolBar.o
+./debug/moc_mainwindow.o
+./debug/moc_logindialog.o
+./debug/moc_adminmainwindow.o
+);
