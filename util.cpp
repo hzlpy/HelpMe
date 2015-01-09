@@ -135,3 +135,78 @@ QString Util::nametoId(QString name)
     }
     return id;
 }
+
+vector<Dish> Util::queryOnePage(int pageNum, int pageSize)
+{
+//    int total = getAllDishesCount();
+    int startIndex = 0;
+    startIndex = (pageNum - 1) * pageSize;
+    QString sql = "SELECT * FROM dish limit ";
+    QString start = QString::number(startIndex);
+    QString size = QString::number(pageSize);
+    QString pageSql = sql.append(start).append(",").append(size);
+    qDebug() << pageSql << endl;
+    QSqlQuery query;
+    qDebug() << query.exec(pageSql) << endl;
+    vector<Dish> page;
+    Dish dish;
+    while (query.next()) {
+        QString id = query.value(0).toString();
+        QString name = query.value(1).toString();
+        QString type = query.value(2).toString();
+        QString style = query.value(3).toString();
+        double price = query.value(4).toDouble();
+
+        dish.setId(id);
+        dish.setName(name);
+        dish.setType(type);
+        dish.setStyle(style);
+        dish.setPrice(price);
+
+        page.push_back(dish);
+    }
+    return page;
+}
+
+vector<Dish> Util::queryLastPage(int pageNum, int pageSize, int curPageSize)
+{
+    //int total = getAllDishesCount();
+
+    int startIndex = (pageNum - 1) * pageSize;
+    QString sql = "SELECT * FROM dish limit ";
+    QString start = QString::number(startIndex);
+    QString size = QString::number(curPageSize);
+    QString pageSql = sql.append(start).append(",").append(size);
+    qDebug() << pageSql << endl;
+    QSqlQuery query;
+    query.exec(sql);
+    vector<Dish> page;
+    Dish dish;
+    while (query.next()) {
+        QString id = query.value(0).toString();
+        QString name = query.value(1).toString();
+        QString type = query.value(2).toString();
+        QString style = query.value(3).toString();
+        double price = query.value(4).toDouble();
+
+        dish.setId(id);
+        dish.setName(name);
+        dish.setType(type);
+        dish.setStyle(style);
+        dish.setPrice(price);
+        page.push_back(dish);
+    }
+    return page;
+}
+
+int Util::getAllDishesCount()
+{
+    int count = -1;
+    QString sql = "SELECT count(id) FROM dish";
+    QSqlQuery query;
+    query.exec(sql);
+    while (query.next()) {
+        count = query.value(0).toInt();
+    }
+    return count;
+}

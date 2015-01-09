@@ -19,8 +19,12 @@ public:
     bool insert(Dish dish);
     QStringList queryAllTypes();
     QStringList queryAllStyles();
+    vector<Dish> queryOnePage(int pageNum, int pageSize);
+    vector<Dish> queryLastPage(int pageNum, int pageSize, int curPageSize);
     //预处理数据
     QString nametoId(QString name);
+    //get all dishes count
+    int getAllDishesCount();
 private:
     QStringList typeList;
     QStringList styleList;
