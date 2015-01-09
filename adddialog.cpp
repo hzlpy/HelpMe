@@ -60,19 +60,24 @@ void AddDialog::setStyleCombobox()
  */
 void AddDialog::slotOk()
 {
-    qDebug() << "OK" << endl;
-    //获取表单中的数据
-    Dish dish;
-    dish.setName(this->ui->nameLineEdit->text());
-    dish.setType(QString::number(this->ui->typeComboBox->currentIndex() + 1));
-    dish.setStyle(QString::number(this->ui->styleComboBox->currentIndex() + 1));
-    dish.setPrice(this->ui->priceDoubleSpinBox->text().toDouble());
-    //插入数据到表dish中
-    if (!util->insert(dish)) {
-        qDebug() << "insert failed." << endl;
-    }
-    //插入成功后发出刷新表格信号
-    emit signalFresh();
+    if(ui->nameLineEdit->text().isEmpty()) {
+        qDebug() << "The dish name is empty." << endl;
+        return;
+    } else {
+        //获取表单中的数据
+        Dish dish;
+        dish.setName(this->ui->nameLineEdit->text());
+        dish.setType(QString::number(this->ui->typeComboBox->currentIndex() + 1));
+        dish.setStyle(QString::number(this->ui->styleComboBox->currentIndex() + 1));
+        dish.setPrice(this->ui->priceDoubleSpinBox->text().toDouble());
+        //插入数据到表dish中
+        if (!util->insert(dish)) {
+            qDebug() << "insert failed." << endl;
+        }
+        ui->nameLineEdit->clear();
 
+        //插入成功后发出刷新表格信号
+        emit signalFresh();
+    }
 }
 

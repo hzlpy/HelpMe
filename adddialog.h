@@ -32,6 +32,7 @@ private slots:
 //    void slotCancel();
 signals:
     void signalFresh();
+//    void signalAddCurPageSize();
 };
 
 #endif // ADDDIALOG_H

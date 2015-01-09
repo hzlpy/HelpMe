@@ -14,6 +14,7 @@ AdminMainWindow::AdminMainWindow(QWidget *parent) :
     connect(this->ui->lastPushButton, SIGNAL(clicked()), this, SLOT(slotLastPage()));
     connect(this->ui->nextPushButton, SIGNAL(clicked()), this, SLOT(slotNextPage()));
     connect(this->ui->previousPushButton, SIGNAL(clicked()), this, SLOT(slotPreviousPage()));
+    connect(&addDialog, SIGNAL(signalFresh()), this, SLOT(slotFresh()));
 }
 
 AdminMainWindow::~AdminMainWindow()
@@ -68,7 +69,8 @@ void AdminMainWindow::slotSave()
  */
 void AdminMainWindow::slotFresh()
 {
-    showAllDishes();
+
+    fresh();
 }
 
 void AdminMainWindow::slotCloseAddDialog()
@@ -122,6 +124,7 @@ void AdminMainWindow::slotFirstPage()
     this->ui->previousPushButton->setDisabled(true);
     this->ui->lastPushButton->setDisabled(false);
     this->ui->nextPushButton->setDisabled(false);
+    this->ui->numLabel->setText(QString::number(this->m_nCurPageNum));
 }
 
 /**
@@ -136,6 +139,7 @@ void AdminMainWindow::slotLastPage()
     this->ui->nextPushButton->setDisabled(true);
     this->ui->firstPushButton->setDisabled(false);
     this->ui->previousPushButton->setDisabled(false);
+    this->ui->numLabel->setText(QString::number(this->m_nCurPageNum));
 }
 
 void AdminMainWindow::initPage()
@@ -161,6 +165,7 @@ void AdminMainWindow::initPage()
 
 void AdminMainWindow::showPage(int pageNum)
 {
+
     Util *util = new Util();
     int pageSize = this->m_nPageSize;
     vector<Dish> page;
@@ -174,12 +179,14 @@ void AdminMainWindow::showPage(int pageNum)
     qDebug() << page.size() << endl;
     Dish dish;
     //显示首页的数据
+    this->ui->tableWidget->clear();
     for (size_t i=0; i<page.size(); ++i){
         dish = page.at(i);
         QString name = dish.getName();
         QString type = dish.getType();
         QString style = dish.getStyle();
         double price = dish.getPrice();
+
         this->ui->tableWidget->setItem(i,0,new QTableWidgetItem(name));
         this->ui->tableWidget->setItem(i,1,new QTableWidgetItem(type));
         this->ui->tableWidget->setItem(i,2,new QTableWidgetItem(style));
@@ -193,7 +200,44 @@ void AdminMainWindow::initTableWidget()
     this->ui->tableWidget->setColumnCount(COLS);
     this->ui->tableWidget->setRowCount(ROWS);
     QStringList header;
-    header << "菜名" << "类型" << "口味" << "价格";
+
+    header << "名字" << "类型" << "口味" << "价格";
     this->ui->tableWidget->setHorizontalHeaderLabels(header);
     this->ui->tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers); //禁止编辑
+}
+
+/**
+ * @brief AdminMainWindow::fresh
+ * 插入数据后立即刷新尾页数据显示
+ */
+void AdminMainWindow::fresh()
+{
+    //获取插入之前尾页显示的数据条数
+    int before_insert_num = this->m_nTotal % this->m_nPageSize;
+    //如果before_insert_num==0，那么插入一条新数据后，总页码会加1，当前页面也应该至尾页
+    if (before_insert_num == 0) {
+        //总页码加1
+        this->m_nPageCount ++;
+        this->ui->sumLabel->setText(QString::number(this->m_nPageCount));
+        qDebug() << "pageCount = " << this->m_nPageCount << endl;
+        //当前页码加1，翻到尾页
+        this->ui->numLabel->setText(QString::number(this->m_nPageCount));
+        this->ui->firstPushButton->setDisabled(false);
+        this->ui->previousPushButton->setDisabled(false);
+        qDebug() << "curPageNum = " << this->m_nCurPageNum << endl;
+        //新插入的数据为新页的第一条数据
+        this->m_nCurPageSize = 1;
+        qDebug() << "curPageSize = " << this->m_nCurPageSize << endl;
+        //查询出新页的数据并显示（只有一条数据）
+        showPage(this->m_nPageCount);
+    } else {
+        //新插入的数据为当前页的第几条
+        this->m_nCurPageSize ++;
+        qDebug() << "curPageSize = " << this->m_nCurPageSize << endl;
+        this->ui->firstPushButton->setDisabled(false);
+        this->ui->previousPushButton->setDisabled(false);
+        //显示最后一页数据
+        showPage(this->m_nPageCount);
+    }
+    this->m_nTotal ++;
 }

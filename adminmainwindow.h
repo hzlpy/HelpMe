@@ -7,8 +7,10 @@
 #include "dish.h"
 #include <QComboBox>
 #include "adddialog.h"
-#define ROWS 3
+#define ROWS 8
 #define COLS 4
+
+
 namespace Ui {
 class AdminMainWindow;
 }
@@ -23,6 +25,7 @@ public:
     void showAllDishes();
 
 private:
+    //QStringList = new  {"菜名","类型","口味","价格"};
     Ui::AdminMainWindow *ui;
     int m_nTotal;        //总记录数
     int m_nPageSize;     //每页显示条数
@@ -36,6 +39,7 @@ private:
     void initTableWidget();
     void initPage();
     void showPage(int pageNum);
+    void fresh();
 
 public slots:
     void slotAdd();
