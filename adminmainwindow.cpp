@@ -1,26 +1,19 @@
 #include "adminmainwindow.h"
-#include "ui_adminmainwindow.h"
+#include "UI/ui_adminmainwindow.h"
 
 AdminMainWindow::AdminMainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::AdminMainWindow)
 {
     ui->setupUi(this);
-    this->m_nTotal = 0;
-    this->m_nStart = -1;
-    this->m_nPageSize = 3;
-    this->m_nCurPageSize = 1;
-    //设置表格的格式
-    this->ui->tableWidget->setColumnCount(4);
-    this->ui->tableWidget->setRowCount(m_nPageSize);
-    QStringList header;
-    header << "菜名" << "类型" << "口味" << "价格";
-    this->ui->tableWidget->setHorizontalHeaderLabels(header);
-    this->ui->tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers); //禁止编辑
-
+    initTableWidget();
+    initPage();
     showAllDishes();
     connect(this->ui->addAction, SIGNAL(triggered()), this, SLOT(slotAdd()));
-    connect(&addDialog, SIGNAL(signalFresh()), this, SLOT(slotFresh()));
+    connect(this->ui->firstPushButton, SIGNAL(clicked()), this, SLOT(slotFirstPage()));
+    connect(this->ui->lastPushButton, SIGNAL(clicked()), this, SLOT(slotLastPage()));
+    connect(this->ui->nextPushButton, SIGNAL(clicked()), this, SLOT(slotNextPage()));
+    connect(this->ui->previousPushButton, SIGNAL(clicked()), this, SLOT(slotPreviousPage()));
 }
 
 AdminMainWindow::~AdminMainWindow()
@@ -34,37 +27,11 @@ AdminMainWindow::~AdminMainWindow()
  */
 void AdminMainWindow::showAllDishes()
 {
-    //连接数据库
-    Util *util = new Util();
-    if (!util->createConnection()) {
-        qDebug() << tr("数据库连接失败") << endl;
-    }
-
-    //查询dish表中所有的数据
-    Dish dish;
-    vector<Dish> dishes = util->queryAllDishes();
-    //将数据填入第一页表格
-    //判断总共有多少条数据
-    int count = dishes.size();
-    if (count >= m_nPageSize) {
-        count = m_nPageSize;
-    }
-    for (int i=0; i<count; ++i){
-        dish = dishes.at(i);
-        QString name = dish.getName();
-        QString type = dish.getType();
-        QString style = dish.getStyle();
-        double price = dish.getPrice();
-        this->ui->tableWidget->setItem(i,0,new QTableWidgetItem(name));
-        this->ui->tableWidget->setItem(i,1,new QTableWidgetItem(type));
-        this->ui->tableWidget->setItem(i,2,new QTableWidgetItem(style));
-        this->ui->tableWidget->setItem(i,3,new QTableWidgetItem(QString::number(price)));
-    }
-    this->m_nTotal = dishes.size();
-    this->m_nCurPageSize = this->m_nTotal % this->m_nPageSize;
-    //设定当前第几页和总共的页数
-    this->ui->label_3->setText(QString::number(m_nCurPageSize / m_nPageSize + 1));
-    this->ui->label_5->setText(QString::number(m_nTotal / m_nPageSize + 1));
+    this->m_nCurPageNum = 1;
+    showPage(this->m_nCurPageNum);
+    this->ui->numLabel->setText(QString::number(this->m_nCurPageNum));
+    this->ui->sumLabel->setText(QString::number(this->m_nPageCount));
+    this->ui->previousPushButton->setDisabled(true);
 }
 /**
  * @brief AdminMainWindow::slotAdd 添加
@@ -72,7 +39,7 @@ void AdminMainWindow::showAllDishes()
 void AdminMainWindow::slotAdd()
 {
     //获取当前页数据的条数
-    int n = this->m_nCurPageSize;
+//    int n = this->m_nCurPageSize;
     addDialog.exec();
 }
 
@@ -115,7 +82,15 @@ void AdminMainWindow::slotCloseAddDialog()
  */
 void AdminMainWindow::slotNextPage()
 {
-
+    this->m_nCurPageNum ++;
+    showPage(this->m_nCurPageNum);
+    this->ui->numLabel->setText(QString::number(this->m_nCurPageNum));
+    this->ui->previousPushButton->setDisabled(false);
+    this->ui->firstPushButton->setDisabled(false);
+    if (this->m_nCurPageNum == this->m_nPageCount) {
+        this->ui->nextPushButton->setDisabled(true);
+        this->ui->lastPushButton->setDisabled(true);
+    }
 }
 
 /**
@@ -124,7 +99,15 @@ void AdminMainWindow::slotNextPage()
  */
 void AdminMainWindow::slotPreviousPage()
 {
-
+    this->m_nCurPageNum --;
+    showPage(this->m_nCurPageNum);
+    this->ui->numLabel->setText(QString::number(this->m_nCurPageNum));
+    this->ui->nextPushButton->setDisabled(false);
+    this->ui->lastPushButton->setDisabled(false);
+    if (this->m_nCurPageNum == 1) {
+        this->ui->previousPushButton->setDisabled(true);
+        this->ui->firstPushButton->setDisabled(true);
+    }
 }
 
 /**
@@ -133,7 +116,12 @@ void AdminMainWindow::slotPreviousPage()
  */
 void AdminMainWindow::slotFirstPage()
 {
-
+    qDebug() << "First Page" << endl;
+    this->m_nCurPageNum = 1;
+    showPage(this->m_nCurPageNum);
+    this->ui->previousPushButton->setDisabled(true);
+    this->ui->lastPushButton->setDisabled(false);
+    this->ui->nextPushButton->setDisabled(false);
 }
 
 /**
@@ -142,5 +130,70 @@ void AdminMainWindow::slotFirstPage()
  */
 void AdminMainWindow::slotLastPage()
 {
+    this->m_nCurPageNum = this->m_nPageCount;
+    showPage(this->m_nCurPageNum);
+    this->ui->numLabel->setText(QString::number(this->m_nCurPageNum));
+    this->ui->nextPushButton->setDisabled(true);
+    this->ui->firstPushButton->setDisabled(false);
+    this->ui->previousPushButton->setDisabled(false);
+}
 
+void AdminMainWindow::initPage()
+{
+    Util *util = new Util();
+    this->m_nStart = 0;
+    this->m_nCurPageNum = 1;//当前页码设置为1
+    this->m_nTotal = util->getAllDishesCount(); //数据总数
+    this->m_nPageSize = ROWS;//设置每页显示数据的条数
+    this->m_nPageCount = this->m_nTotal / this->m_nPageSize + 1;
+    //计算页码总数
+    if (this->m_nTotal % this->m_nPageSize == 0) {
+        this->m_nPageCount = this->m_nTotal / this->m_nPageSize;
+    } else {
+        this->m_nPageCount = this->m_nTotal / this->m_nPageSize + 1;
+    }
+    if (this->m_nCurPageNum == this->m_nPageCount) {
+        this->m_nCurPageSize = this->m_nTotal % this->m_nPageSize;
+    } else {
+        this->m_nCurPageSize = this->m_nPageSize;
+    }
+}
+
+void AdminMainWindow::showPage(int pageNum)
+{
+    Util *util = new Util();
+    int pageSize = this->m_nPageSize;
+    vector<Dish> page;
+    if (pageNum < this->m_nPageCount) { //如果页码小于页码总数
+        //查询一页数据
+        page = util->queryOnePage(pageNum, pageSize);
+    } else {
+        //查询尾页数据
+        page = util->queryLastPage(pageNum, pageSize, this->m_nCurPageSize);
+    }
+    qDebug() << page.size() << endl;
+    Dish dish;
+    //显示首页的数据
+    for (size_t i=0; i<page.size(); ++i){
+        dish = page.at(i);
+        QString name = dish.getName();
+        QString type = dish.getType();
+        QString style = dish.getStyle();
+        double price = dish.getPrice();
+        this->ui->tableWidget->setItem(i,0,new QTableWidgetItem(name));
+        this->ui->tableWidget->setItem(i,1,new QTableWidgetItem(type));
+        this->ui->tableWidget->setItem(i,2,new QTableWidgetItem(style));
+        this->ui->tableWidget->setItem(i,3,new QTableWidgetItem(QString::number(price)));
+      }
+}
+
+void AdminMainWindow::initTableWidget()
+{
+    //设置表格的格式
+    this->ui->tableWidget->setColumnCount(COLS);
+    this->ui->tableWidget->setRowCount(ROWS);
+    QStringList header;
+    header << "菜名" << "类型" << "口味" << "价格";
+    this->ui->tableWidget->setHorizontalHeaderLabels(header);
+    this->ui->tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers); //禁止编辑
 }

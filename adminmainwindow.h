@@ -7,6 +7,8 @@
 #include "dish.h"
 #include <QComboBox>
 #include "adddialog.h"
+#define ROWS 3
+#define COLS 4
 namespace Ui {
 class AdminMainWindow;
 }
@@ -19,13 +21,21 @@ public:
     explicit AdminMainWindow(QWidget *parent = 0);
     ~AdminMainWindow();
     void showAllDishes();
+
 private:
     Ui::AdminMainWindow *ui;
     int m_nTotal;        //总记录数
     int m_nPageSize;     //每页显示条数
     int m_nCurPageSize;  //当前页数据条数
     int m_nStart;        //起始记录数
+    int m_nCurPageNum;   //当前页码
+    int m_nPageCount;    //总页数
+//    int m_nCols;         //表格的列数
+//    int m_nRows;         //表格的行数
     AddDialog addDialog;
+    void initTableWidget();
+    void initPage();
+    void showPage(int pageNum);
 
 public slots:
     void slotAdd();
