@@ -36,3 +36,5 @@ FORMS    += mainwindow.ui \
 
 RESOURCES += \
     toolBar.qrc
+
+UI_DIR += ./UI
