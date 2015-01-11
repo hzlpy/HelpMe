@@ -55,6 +55,46 @@ vector<Dish> Util::queryAllDishes()
 }
 
 /**
+ * @brief Util::queryAllTypes
+ * @return types
+ */
+vector<Type> Util::queryAllTypes()
+{
+    vector<Type> types;
+    QSqlQuery query;
+    query.exec("SELECT type.id, type.name FROM type");
+    while(query.next()) {
+        Type type;
+        QString id = query.value(0).toString();
+        QString name = query.value(1).toString();
+        type.setId(id);
+        type.setName(name);
+        types.push_back(type);
+    }
+    return types;
+}
+
+/**
+ * @brief Util::queryAllStyles
+ * @return styles
+ */
+vector<Style> Util::queryAllStyles()
+{
+    vector<Style> styles;
+    QSqlQuery query;
+    query.exec("SELECT type.id, type.name FROM type");
+    while(query.next()) {
+        Style style;
+        QString id = query.value(0).toString();
+        QString name = query.value(1).toString();
+        style.setId(id);
+        style.setName(name);
+        styles.push_back(style);
+    }
+    return styles;
+}
+
+/**
  * @brief Util::insert 插入数据
  * @param dish
  * @return
@@ -80,7 +120,7 @@ bool Util::insert(Dish dish)
 /**
  * @brief Util::queryAllTypes
  */
-QStringList Util::queryAllTypes()
+QStringList Util::queryAllTypename()
 {
     if (!typeList.isEmpty()) {
         typeList.clear();
@@ -98,7 +138,7 @@ QStringList Util::queryAllTypes()
 /**
  * @brief Util::queryAllStyles
  */
-QStringList Util::queryAllStyles()
+QStringList Util::queryAllStylename()
 {
     if (!styleList.isEmpty()) {
         styleList.clear();
@@ -116,8 +156,8 @@ QStringList Util::queryAllStyles()
 QString Util::nametoId(QString name)
 {
     QString id = "1024";
-    typeList = queryAllTypes();
-    styleList = queryAllStyles();
+    typeList = queryAllTypename();
+    styleList = queryAllStylename();
 
     for (int i=0; i<typeList.size(); ++i) {
         QString qtype = typeList.at(i);
@@ -141,7 +181,8 @@ vector<Dish> Util::queryOnePage(int pageNum, int pageSize)
 //    int total = getAllDishesCount();
     int startIndex = 0;
     startIndex = (pageNum - 1) * pageSize;
-    QString sql = "SELECT * FROM dish limit ";
+//    QString sql = "SELECT * FROM dish limit ";
+    QString sql = "SELECT dish.id, dish.name, type.name, style.name, dish.price FROM dish , TYPE , STYLE WHERE dish.TYPE = type.ID AND dish.STYLE = style.ID LIMIT ";
     QString start = QString::number(startIndex);
     QString size = QString::number(pageSize);
     QString pageSql = sql.append(start).append(",").append(size);
@@ -173,7 +214,7 @@ vector<Dish> Util::queryLastPage(int pageNum, int pageSize, int curPageSize)
     //int total = getAllDishesCount();
 
     int startIndex = (pageNum - 1) * pageSize;
-    QString sql = "SELECT * FROM dish limit ";
+    QString sql = "SELECT dish.id, dish.name, type.name, style.name, dish.price FROM dish , TYPE , STYLE WHERE dish.TYPE = type.ID AND dish.STYLE = style.ID LIMIT ";
     QString start = QString::number(startIndex);
     QString size = QString::number(curPageSize);
     QString pageSql = sql.append(start).append(",").append(size);
@@ -199,6 +240,10 @@ vector<Dish> Util::queryLastPage(int pageNum, int pageSize, int curPageSize)
     return page;
 }
 
+/**
+ * @brief Util::getAllDishesCount
+ * @return 数据的总条数
+ */
 int Util::getAllDishesCount()
 {
     int count = -1;
@@ -210,3 +255,23 @@ int Util::getAllDishesCount()
     }
     return count;
 }
+
+/**
+ * @brief Util::idtoName convert id to name
+ * @param id
+ * @return name
+ *
+ */
+QString Util::idtoTypeName(QString id)
+{
+    QString name = "1024";
+//    typeList = queryAllTypename();
+//    styleList = queryAllStylename();
+
+//    for (int i=0; i<typeList.size(); ++i) {
+
+//    }
+    return name;
+}
+
+

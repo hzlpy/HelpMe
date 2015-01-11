@@ -22,7 +22,7 @@ AddDialog::~AddDialog()
  */
 void AddDialog::getTypeList()
 {
-    typeList = util->queryAllTypes();
+    typeList = util->queryAllTypename();
 }
 
 /**
@@ -30,7 +30,7 @@ void AddDialog::getTypeList()
  */
 void AddDialog::getStyleList()
 {
-    styleList = util->queryAllStyles();
+    styleList = util->queryAllStylename();
 }
 
 /**
